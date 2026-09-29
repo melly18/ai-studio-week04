@@ -15,12 +15,17 @@ def calc_total(path):
     total = 0
     with open(path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)  # 사전타입으로 데이터를 읽음.
+        missing_v = 0   #FIXED: 결측치 개수를 세기 위한 변수
         for i, row in enumerate(reader):
-            price = int(row["price"])        # <-- 여기가 문제의 줄
+            if row["price"] == '':      #FIXED: 만약 price의 값이 없다면
+                missing_v += 1  #FIXED: 결측치 개수에 1을 더하고
+                continue     #FIXED: 해당 row의 연산을 수행하지 않는다.
+            price = int(row["price"].replace(",","").replace("원","").strip())   #FIXED: 콤마와 "원" 제거 후 int 변환
             qty = int(row["quantity"])
             total += price * qty
-    return total
+    return total, missing_v  #FIXED: 결측치 개수도 return해 준다.
 
 if __name__ == "__main__":
-    total = calc_total("dirty_sales.csv") #FIXED: 잘못된 파일 경로 수정
+    total, missing_v = calc_total("dirty_sales.csv") #FIXED: 잘못된 파일 경로 수정 & return 변화에 따른 추가 변수 설정
     print(f"총 매출액: {total:,}원")
+    print(f"결측치: {missing_v:,}개")  #FIXED: 결측치의 개수를 사용자에게 알린다.
