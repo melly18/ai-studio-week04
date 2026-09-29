@@ -1,4 +1,4 @@
-### 1. buggy_1.py
+## 1. buggy_1.py
 **FileNotFoundError: [Errno 2] No such file or directory: './Week4/dirty_sales.csv'**  
 File "buggy_1.py", line 16, in calc_total
 ```python
@@ -34,7 +34,7 @@ Line 19의 코드를 위와 같이 수정해 주었다. strip()의 경우, 혹�
 
 ---
 
-**ValueError: invalid literal for int() with base 10: '4200원'**
+**ValueError: invalid literal for int() with base 10: '4200원'**  
 File "buggy_1.py", line 19, in calc_total
 ```python
 price = int(row["price"].replace(",","").strip())
@@ -51,7 +51,7 @@ price = int(row["price"].replace(",","").replace("원","").strip())
 
 ---
 
-**ValueError: invalid literal for int() with base 10: ''**
+**ValueError: invalid literal for int() with base 10: ''**  
 File "buggy_1.py", line 19, in calc_total
 ```python
 price = int(row["price"].replace(",","").replace("원","").strip())
