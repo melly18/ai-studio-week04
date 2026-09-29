@@ -194,3 +194,25 @@ category
 Name: 매출액, dtype: int64
 ```
 의 출력을 얻을 수 있었고, main의 마지막 줄에 buggy_1.py의 총액과 카테고리별 합계의 합이 일치하는지 assert 코드를 넣은 결과 assertion error 없이 잘 마무리되는 것을 확인할 수 있었다. 이렇게 buggy_2.py의 수정을 마쳤다.
+
+---
+
+## 3. buggy_3.py
+**AttributeError: 'NoneType' object has no attribute 'groupby'**  
+File "buggy_3.py", line 28, in main
+```python
+result = df.groupby("category")["revenue"].sum()
+```
+df에 groupby를 호출했는데 Attribute Error가 위와 같이 발생했다. 메시지를 읽어보면 df가 NoneType이어서 발생한 오류임을 추측할 수 있다. 따라서 해당 줄 위에
+```python
+print(type(df))
+```
+코드를 추가하여 확인한 결과
+```
+<class 'NoneType'>
+```
+으로 pandas.dataframe이 아닌 것을 볼 수 있다. main에서 df를 정의한 코드를 확인하면
+```python
+df = load_and_clean("dirty_sales.csv")
+```
+이다. 이제 load_and_clean 함수를 살펴볼 차례다. 함수가 아무것도 return하지 않는 것을 볼 수 있다. 즉, 함수 실행 결과 df가 할당받은 값이 없어 NoneType이 된 것. 그러므로 df의 method인 groupby를 사용할 수 없고 에러가 발생한 것이다.
