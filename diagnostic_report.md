@@ -82,3 +82,97 @@ print(df.columns.tolist())
 ['date', 'product', 'category', 'price', 'quantity', 'stock']
 ```
 와 같은 column들이 dirty_sales.csv를 이루고 있음을 알 수 있었다. 즉, '단가'라는 column이 존재하지 않아 에러가 발생한 것이며, 단가에서 에러가 발생해 넘어갔지만 바로 다음의 '수량' 또한 에러의 원인이 될 수 있음을 확인하였다.
+
+---
+
+'단가'와 '수량'에 맞는 column명으로 바꿔주면서 line 20을 아래와 같이 수정하였다.
+```python
+df["매출액"] = df["price"] * df["quantity"]
+```
+실행 결과, Key Error는 수정되었지만 새로운 에러가 발생하였다.
+
+---
+
+summarize를 완료한 이후 카테고리별 합계를 print하면 다음과 같은 결과가 출력된다.
+```
+category
+굿즈      1500015000150001500015000150001500012000120001...
+베이커리    3800380038003800380038003800380038003800380038...
+원두      1800018000180001800018000180001800018000180001...
+음료      4500450045004500450045004500450045004500450045...
+Name: 매출액, dtype: str
+```
+Error가 발생하지는 않았지만, 출력 결과를 살펴보면 문제가 있음을 알 수 있다. 카테고리별 매출 합계이므로 숫자 값이어야 하는데, dtype: str이다. 즉, "price" 또는 "quantity"의 column 데이터가 str이라 제대로 된 값이 나오지 않은 것이다. 이를 확인하기 위해
+```python
+print(df["price"].info())
+print(df["quantity"].info())
+```
+를 실행하면 다음과 같은 결과가 나온다.
+```
+<class 'pandas.Series'>
+RangeIndex: 500 entries, 0 to 499
+Series name: price
+Non-Null Count  Dtype
+--------------  -----
+498 non-null    str  
+dtypes: str(1)
+memory usage: 4.0 KB
+None
+<class 'pandas.Series'>
+RangeIndex: 500 entries, 0 to 499
+Series name: quantity
+Non-Null Count  Dtype
+--------------  -----
+500 non-null    int64
+dtypes: int64(1)
+memory usage: 4.0 KB
+None
+```
+즉, quantity의 경우 int형이며 nan도 없지만, price의 값에 문제가 있어 에러가 발생한 것을 알 수 있다. buggy_1.py에서와 동일한 csv 파일을 사용하기 때문에 같은 에러("price"에 콤마와 '원' 포함, 결측치 2개 존재)가 존재할 것에 유의하여 코드를 수정한다.
+
+---
+
+summarize 함수를 다음과 같이 수정하였다.
+```python
+def summarize(df):
+    df["price"] = pd.to_numeric(df["price"].astype(str).str.replace(",","").str.replace("원","").str.strip(), errors="coerce")
+    df = df.dropna(subset=["price"])
+    df["price"] = df["price"].astype("int64")
+    df["매출액"] = df["price"] * df["quantity"]
+    return df.groupby("category")["매출액"].sum()
+```
+그 결과
+```
+category
+굿즈      150099546000
+베이커리        65254500
+원두         180897000
+음료         841040024
+Name: 매출액, dtype: int64
+```
+의 카테고리별 매출액 합계가 제대로 나오는 것을 확인할 수 있었다. 이에 buggy_1.py에서 구했던 총 매출액 합계와 비교해 연산이 잘 수행되었는지 확인했다. 그리고 이 때, 오류가 발생한다.
+
+---
+
+이번에도 명시적인 에러는 없다. 하지만 결과를 면밀히 살펴보면 이상한 점을 발견할 수 있다.
+```python
+print(f"총 매출액: {result.sum():,}원")
+```
+위 코드를 main에서 실행하면 151,186,737,524원이 나오는데, 이는 buggy_1.py에서 구한 값과 다르다. 이에 매출액의 합계를 구하는 코드를 함수 안에 넣어 결과를 확인해 보았다.
+```python
+print(f"총 매출액: {df["매출액"].sum():,}원")
+```
+그 결과는 151,198,388,824원으로 buggy_1.py의 결과값과 동일했다. 그렇다면 무엇이 문제일까?  
+df["매출액"]을 구한 다음 코드에서 문제가 있을 거라 생각해 살펴보면, 카테고리별로 groupby를 한 코드임을 확인할 수 있었다. 이에 카테고리의 info를 확인해 봤는데,
+```
+<class 'pandas.Series'>
+Index: 498 entries, 0 to 499
+Series name: category
+Non-Null Count  Dtype
+--------------  -----
+488 non-null    str  
+dtypes: str(1)
+memory usage: 7.8 KB
+None
+```
+즉, 카테고리에 결측치가 존재하여 해당 row를 계산하지 못해 값에 차이가 생긴 것이다.
