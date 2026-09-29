@@ -22,5 +22,5 @@ def calc_total(path):
     return total
 
 if __name__ == "__main__":
-    total = calc_total("./Week4/dirty_sales.csv")
+    total = calc_total("dirty_sales.csv") #FIXED: 잘못된 파일 경로 수정
     print(f"총 매출액: {total:,}원")
