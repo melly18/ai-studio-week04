@@ -17,10 +17,15 @@ def load(path):
 
 def summarize(df):
     # 단가 x 수량으로 매출액 컬럼을 만든 뒤 카테고리별 합계를 낸다
-    df["매출액"] = df["단가"] * df["수량"]        # <-- 여기가 문제의 줄
+    df["price"] = pd.to_numeric(df["price"].astype(str).str.replace(",","").str.replace("원","").str.strip(), errors="coerce")  #FIXED: price에서 콤마와 "원"을 제거하고 숫자로 변환
+    df = df.dropna(subset=["price"])  #FIXED: df에서 price가 결측치인 row 삭제
+    df["price"] = df["price"].astype("int64")  #FIXED: price가 int형이 되도록 변환
+    df["매출액"] = df["price"] * df["quantity"]    #FIXED: 잘못된 column명 수정
+    df["category"] = df["category"].fillna("미분류")  #FIXED: 결측치 카테고리를 '미분류'로 지정
     return df.groupby("category")["매출액"].sum()
 
 if __name__ == "__main__":
     df = load("dirty_sales.csv")
     result = summarize(df)
     print(result)
+    assert result.sum() == 151198388824
