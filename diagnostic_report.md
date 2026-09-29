@@ -66,3 +66,19 @@ if문을 통해 price의 값이 존재하지 않을 경우 해당 row의 연산�
 결측치: 2개
 ```
 결측치가 2개에 불과하기 때문에 삭제를 해도 괜찮다는 판단을 내렸으며, 따라서 이렇게 buggy_1.py의 최종 수정을 마무리했다.
+
+## 2. buggy_2.py
+**KeyError: '단가'**  
+File "buggy_2.py", line 20, in summarize
+```python
+df["매출액"] = df["단가"] * df["수량"]
+```
+buggy_2.py는 dirty_sales.csv를 pandas를 이용해 dataframe으로 읽어들이는데, '단가'에 대해서 Key Error가 발생했다는 것은 column명이 잘못되었음을 의미한다. 확인을 위해
+```python
+print(df.columns.tolist())
+```
+를 csv 파일 로드 이후에 추가하였고, 그 결과
+```
+['date', 'product', 'category', 'price', 'quantity', 'stock']
+```
+와 같은 column들이 dirty_sales.csv를 이루고 있음을 알 수 있었다. 즉, '단가'라는 column이 존재하지 않아 에러가 발생한 것이며, 단가에서 에러가 발생해 넘어갔지만 바로 다음의 '수량' 또한 에러의 원인이 될 수 있음을 확인하였다.
