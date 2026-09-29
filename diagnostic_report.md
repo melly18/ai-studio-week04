@@ -364,3 +364,7 @@ File "buggy_5.py", line 29, inf find_big_jumps
 diff = prices[i + 1] - prices[i]
 ```
 인덱스 범위의 문제이기 때문에 디버거를 이용해 문제가 되는 부분을 찾아야 한다. 0부터 len(prices)만큼 반복하는 for 반복문에 해당 코드가 속해 있다. 코드를 읽어보았을 때, range는 0부터 시작하여 len(prices)-1까지 반복하기 때문에 끝 부분에서 Error가 있을 확률이 높다고 여겼다. 실제로 디버깅을 실행하면 i = 499일 때 error가 발생함을 할 수 있다. 즉, prices라는 list의 index는 len(prices)-1인 499까지밖에 없는데, 여기에 1을 더한 인덱스에 접근을 시도해 에러가 발생한 것이다.
+
+---
+
+검증 결과는 usage_log.md에 기록했다.
