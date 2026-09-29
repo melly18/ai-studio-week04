@@ -220,3 +220,57 @@ df = load_and_clean("dirty_sales.csv")
 ---
 
 검증 결과는 usage_log.md에 기록했다.
+
+## 4. buggy_4.py
+함수를 실행하면 다음과 같은 결과각 출력된다.
+```
+총 매출액: 151,198,388,824원
+평균 단가: 28,342원
+```
+에러가 발생하지 않았기 때문에 buggy_1.py의 총 매출액과 비교하여 검증을 진행해 보았다. 그 결과, buggy_1.py와 가격이 동일하여 문제는 없음을 알 수 있었다. 하지만 buggy_1.py가 파일의 매출액을 제대로 구했을지라도, 정말 올바른 데이터 분석일까? 이를 확인하기 위해 price와 quantity의 데이터를 살펴보았다.  
+우선 price의 info와 describe의 결과는 다음과 같다.
+```
+<class 'pandas.Series'>
+RangeIndex: 500 entries, 0 to 499
+Series name: price
+Non-Null Count  Dtype  
+--------------  -----  
+498 non-null    float64
+dtypes: float64(1)
+memory usage: 4.0 KB
+None
+count    4.980000e+02
+mean     2.834237e+04
+std      4.477810e+05
+min     -4.500000e+03
+25%      3.800000e+03
+50%      5.000000e+03
+75%      1.200000e+04
+max      9.999999e+06
+Name: price, dtype: float64
+```
+price를 int 변환한 이후 값을 describe하도록 했기 때문에 숫자들의 분석을 볼 수 있다.  
+결측치는 2개 존재하는데, sum은 결측치를 무시하고 더하기 때문에 앞서 결측치 제거 처리를 한 결과와 동일하게 나온 것이다. 그보다 중요한 것은 바로 describe다. 최솟값이 음수인 것과 상위 25% 값보다 지나치게 큰 max값이다. 이러한 이상치들이 총액과 평균을 망치고 있을 수 있는 것이다.  
+이번에는 quantity에 이상치가 있는지 살펴보자.
+```
+<class 'pandas.Series'>
+RangeIndex: 500 entries, 0 to 499
+Series name: quantity
+Non-Null Count  Dtype
+--------------  -----
+500 non-null    int64
+dtypes: int64(1)
+memory usage: 4.0 KB
+None
+count    5.000000e+02
+mean     2.010569e+04
+std      4.472088e+05
+min      1.000000e+00
+25%      5.375000e+01
+50%      1.120000e+02
+75%      1.610000e+02
+max      9.999999e+06
+Name: quantity, dtype: float64
+```
+결측치가 존재하지 않는 이상적인 상태이고, 음수 값은 존재하지 않는다. 다만 상위 25%값과 비교했을 때 최댓값이 지나치게 큰 상황이다.  
+price와 quantity의 이상치들은 유의미한 데이터 분석에 있어서 보이지 않는 오류로 작동할 수 있다.
