@@ -216,3 +216,7 @@ print(type(df))
 df = load_and_clean("dirty_sales.csv")
 ```
 이다. 이제 load_and_clean 함수를 살펴볼 차례다. 함수가 아무것도 return하지 않는 것을 볼 수 있다. 즉, 함수 실행 결과 df가 할당받은 값이 없어 NoneType이 된 것. 그러므로 df의 method인 groupby를 사용할 수 없고 에러가 발생한 것이다.
+
+---
+
+검증 결과는 usage_log.md에 기록했다.

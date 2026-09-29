@@ -20,13 +20,18 @@ def load_and_clean(path):
                               .str.replace("원", "")
                               .str.strip())
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    df = df.dropna(subset=["price"])  #FIXED: price의 결측치 row를 제거한다.
+    df["category"] = df["category"].fillna("미분류")  #FIXED: category의 결측값을 '미분류'로 새롭게 지정한다.
+    df["price"] = df["price"].astype(int)  #FIXED: price를 int 변환한다.
     df["revenue"] = df["price"] * df["quantity"]
-    # (여기서 정제된 df를 돌려주려고 했는데...)   <-- 무언가 빠져 있다
+
+    return df  #FIXED: DataFrame을 반환해 준다.
 
 def main():
     df = load_and_clean("dirty_sales.csv")
-    result = df.groupby("category")["revenue"].sum()   # <-- 여기서 죽는다
+    result = df.groupby("category")["revenue"].sum()
     print(result)
+    assert result.sum() == 151198388824
 
 if __name__ == "__main__":
     main()
