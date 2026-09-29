@@ -23,7 +23,11 @@ def main():
                               .str.replace("원", "")
                               .str.strip())
     df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    df = df.dropna(subset=["price"])  #FIXED: price의 결측치 2개를 제거한다.
 
+    df.loc[199, 'price'] = 2800  #FIXED: 음수값이었던 마들렌의 가격을 적절하게 바꿔준다.
+    df.loc[250, 'price'] = 5000  #FIXED: 너무 큰 이상치였던 카페라떼의 가격을 적절하게 바꿔준다.
+    
     # 매출액 = 단가 x 수량 (NaN이 섞이면 그 행의 매출액도 NaN)
     df["revenue"] = df["price"] * df["quantity"]
 
