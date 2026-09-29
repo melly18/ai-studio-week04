@@ -26,9 +26,12 @@ def load_prices(path):
 def find_big_jumps(prices, threshold=100000):
     jumps = []
     for i in range(len(prices)):
-        diff = prices[i + 1] - prices[i]      # <-- 여기가 문제의 줄
-        if abs(diff) >= threshold:
-            jumps.append((i, prices[i], prices[i + 1], diff))
+        diff = prices[(i + 1) % len(prices)] - prices[i]   #FIXED: 마지막 행이 첫 번째 행과 비교될 수 있도록 수정
+        big_jump = abs(diff) >= threshold   #FIXED: 변화폭이 지나치게 큰 지 확인
+        this_negative = prices[i] < 0 and prices[(i + 1) % len(prices)] > 0  #FIXED: 현재 행이 음수고 다음 행이 양수인 변화 지점 확인
+        next_negative = prices[i] > 0 and prices[(i + 1) % len(prices)] < 0  #FIXED: 현재 행이 양수고 다음 행이 음수인 변화 지점 확인
+        if big_jump or this_negative or next_negative:   #FIXED: 세 조건 중 하나라도 만족하는지 확인
+            jumps.append((i, prices[i], prices[(i + 1) % len(prices)], diff))  #FIXED: 마지막 행이 첫 번째 행과 비교되었음을 나타낼 수 있도록 수정
     return jumps
 
 if __name__ == "__main__":
